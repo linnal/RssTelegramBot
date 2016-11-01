@@ -9,13 +9,13 @@ import org.junit.Test
 class TestTelegramUpdateParser {
 
     @Test
-    fun testParseUserMessage_with_message_start(){
+    fun testParseUserMessageWithMessageStart(){
         val response = TelegramUpdateParser.parseUserMessage(1234, "start")
         Assert.assertTrue(response.contains("To add an rss just write"))
     }
 
     @Test
-    fun testParseUserMessage_with_message_add_rss(){
+    fun testParseUserMessageWithMessageAddRss(){
         TelegramUpdateParser.parseUserMessage(1234, "http://localhost")
         val response = TelegramUpdateParser.parseUserMessage(1234, "http://erinda")
         Assert.assertEquals("[http://localhost, http://erinda]", response)
