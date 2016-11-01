@@ -11,12 +11,8 @@ import javax.xml.bind.annotation.XmlRootElement
 @XmlRootElement(name="rss")
 @XmlAccessorType(XmlAccessType.FIELD)
 class Rss(){
-
-
     @XmlElement(name = "channel")
     val channel = Channel()
-
-
 }
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -24,5 +20,6 @@ class Channel{
     val title: String = ""
     val lastBuildDate: String = ""
     val pubDate: String = ""
-    val item = emptyList<Item>().toMutableList()
+    @XmlElement(name = "item")
+    val items = emptyList<Item>().toMutableList()
 }

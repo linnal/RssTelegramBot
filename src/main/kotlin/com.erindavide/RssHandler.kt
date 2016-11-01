@@ -11,8 +11,6 @@ class RssHandler() : TelegramLongPollingBot() {
     override fun getBotUsername() = "linrssbot"
 
     override fun onUpdateReceived(update: Update) {
-        print(update.toString())
-
         val userId = update.message.from.id
         val text = update.message.text
 
@@ -23,7 +21,5 @@ class RssHandler() : TelegramLongPollingBot() {
         send.setText(respose)
         sendMessage(send)
     }
-
-
 
 }

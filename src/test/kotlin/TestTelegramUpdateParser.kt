@@ -1,12 +1,19 @@
 
+import com.erindavide.db.Storage
 import com.erindavide.parser.TelegramUpdateParser
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 
 /**
  * Created by linnal on 11/1/16.
  */
-class TestTelegramUpdateParser {
+class TestTelegramUpdateParser{
+
+    @Before
+    fun clean() {
+        Storage.deleteAll()
+    }
 
     @Test
     fun testParseUserMessageWithMessageStart(){

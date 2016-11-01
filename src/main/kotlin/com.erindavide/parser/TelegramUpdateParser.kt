@@ -16,7 +16,7 @@ object TelegramUpdateParser {
             Storage.addRss(userId, text)
         }
 
-        return Storage.getAllRss(userId).toString()
+        return Storage.getAllRssFor(userId).toString()
     }
 
     private fun startMessage(): String {

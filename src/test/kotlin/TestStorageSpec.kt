@@ -2,6 +2,7 @@
 import com.erindavide.db.Storage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 
 
@@ -10,6 +11,11 @@ import org.junit.Test
  */
 
 class TestStorageSpec {
+
+    @Before
+    fun clean() {
+        Storage.deleteAll()
+    }
 
     @Test
     fun testAddRss(){
@@ -28,7 +34,7 @@ class TestStorageSpec {
         Storage.addRss(userId, first_rss)
         Storage.addRss(userId, second_rss)
 
-        assertEquals(2, Storage.getAllRss(userId).size)
+        assertEquals(2, Storage.getAllRssFor(userId).size)
     }
 
 }
