@@ -1,39 +1,28 @@
 package com.erindavide.parser
 
 import com.erindavide.data.Rss
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.fuel.httpGet
-import com.github.kittinunf.result.Result
-import com.github.kittinunf.result.getAs
 import java.net.URL
 import javax.xml.bind.JAXBContext
+import javax.xml.bind.UnmarshalException
 
 /**
  * Created by linnal on 11/1/16.
  */
-class RssFeedParser(val url: String) {
+object RssFeedParser {
 
-    fun parse(): String {
-        val res = url.httpGet().responseString{request, respose, result ->
-            when (result) {
-                is Result.Failure -> {
-                    print( result.getAs<FuelError>().toString() )
-                }
-                is Result.Success -> {
-//                    parseSuccess( result.getAs<String>().toString() )
-                }
-            }
+    fun parseFeed(url: String): Rss?{
+
+        try {
+            val _url = URL(url)
+            val jc = JAXBContext.newInstance(Rss::class.java)
+
+            val unmarshaller = jc.createUnmarshaller()
+            return unmarshaller.unmarshal(_url) as Rss
+
+        }catch(e: UnmarshalException){
+            return null
         }
-        return ""
-    }
 
-    fun parseSuccess(){
-        val _url = URL(url)
-        val jc = JAXBContext.newInstance(Rss::class.java)
-
-        val unmarshaller = jc.createUnmarshaller()
-        val rss = unmarshaller.unmarshal(_url) as Rss
-        //TODO save rss data to db
     }
 
 }
