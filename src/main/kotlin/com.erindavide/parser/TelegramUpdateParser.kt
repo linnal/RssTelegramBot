@@ -1,11 +1,11 @@
-package com.erindavide
+package com.erindavide.parser
 
 import com.erindavide.db.Storage
 
 /**
  * Created by linnal on 11/1/16.
  */
-object RssParser {
+object TelegramUpdateParser {
     fun parseUserMessage(userId: Int, text: String): String{
 
         if(text.equals("/start") or text.equals("start") or text.equals("help")){

@@ -1,5 +1,6 @@
 package com.erindavide
 
+import com.erindavide.parser.TelegramUpdateParser
 import org.telegram.telegrambots.api.methods.send.SendMessage
 import org.telegram.telegrambots.api.objects.Update
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
@@ -15,7 +16,7 @@ class RssHandler() : TelegramLongPollingBot() {
         val userId = update.message.from.id
         val text = update.message.text
 
-        val respose = RssParser.parseUserMessage(userId, text)
+        val respose = TelegramUpdateParser.parseUserMessage(userId, text)
 
         val send = SendMessage()
         send.chatId = update.message.chatId.toString()
