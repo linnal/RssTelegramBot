@@ -9,21 +9,22 @@ import com.erindavide.db.Storage
 object TelegramUpdateParser {
     fun parseUserMessage(user: User, text: String): String{
 
-        if(text.equals("/start") or text.equals("start") or text.equals("help")){
-            return startMessage();
+        when(text){
+            "/start", "/help" -> return startMessage()
+            "/delete" -> return "TODO"
+            else -> if(text.contains("http")) {
+                Storage.addRss(user, text)
+            }
         }
-
-        if(text.startsWith("http")){
-            Storage.addRss(user, text)
-        }
-
         return Storage.getAllRssFor(user.id).toString()
     }
 
     private fun startMessage(): String {
-        return "To add an rss just write the rss url you want to get notifications \n"+
-                "list to see the list of rss you are registered \n" +
-                "delete #rss_nr taken from your rss list to delete a single rss\n" +
-                "delte all to delete all the rss"
+        return "Here you can follow your favorites rss feeds:\n\n" +
+                "To add an rss just write the #rss_url you want to get notifications \n"+
+                "/list - to see the list of rss you are registered \n" +
+                "/delete #rss_nr - taken from your rss list to delete a single rss\n" +
+                "/delte_all - to delete all the rss\n" +
+                "/help - to see the list of possible commands"
     }
 }
