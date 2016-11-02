@@ -3,6 +3,9 @@ package com.erindavide.db
 import com.erindavide.data.Item
 import com.erindavide.data.Rss
 import com.erindavide.data.User
+import com.heroku.sdk.jdbc.DatabaseUrl
+import java.sql.Connection
+import java.sql.SQLException
 import java.util.*
 
 /**
@@ -55,4 +58,5 @@ object Storage {
         feedItems.clear()
         users.clear()
     }
+
 }
