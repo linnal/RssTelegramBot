@@ -1,22 +1,23 @@
 package com.erindavide.parser
 
+import com.erindavide.data.User
 import com.erindavide.db.Storage
 
 /**
  * Created by linnal on 11/1/16.
  */
 object TelegramUpdateParser {
-    fun parseUserMessage(userId: Int, text: String): String{
+    fun parseUserMessage(user: User, text: String): String{
 
         if(text.equals("/start") or text.equals("start") or text.equals("help")){
             return startMessage();
         }
 
         if(text.startsWith("http")){
-            Storage.addRss(userId, text)
+            Storage.addRss(user, text)
         }
 
-        return Storage.getAllRssFor(userId).toString()
+        return Storage.getAllRssFor(user.id).toString()
     }
 
     private fun startMessage(): String {

@@ -1,5 +1,6 @@
 
 import com.erindavide.Poller
+import com.erindavide.data.User
 import com.erindavide.db.Storage
 import org.junit.Assert
 import org.junit.Before
@@ -17,9 +18,11 @@ class TestPoller {
 
     @Test
     fun testCheckForUpdates(){
-        Storage.addRss(1234, "http://linnal.github.io/feed.xml")
-        val feeds = Poller.checkForUpdates()
-        Assert.assertEquals(1, feeds.size)
+        val url = "http://linnal.github.io/feed.xml"
+        Storage.addRss(User(1234, "11"), url)
+        val rssList = Poller.checkForUpdates()
+
+        Assert.assertEquals(0, rssList.size)
     }
 
 }

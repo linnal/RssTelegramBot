@@ -20,6 +20,7 @@ class Channel{
     val title: String = ""
     val lastBuildDate: String = ""
     val pubDate: String = ""
+    val link: String = ""
     @XmlElement(name = "item")
     val items = emptyList<Item>().toMutableList()
 }

@@ -1,6 +1,8 @@
 package com.erindavide.db
 
 import com.erindavide.data.Item
+import com.erindavide.data.Rss
+import com.erindavide.data.User
 import java.util.*
 
 /**
@@ -11,19 +13,21 @@ object Storage {
     val userToFeeds: MutableMap<Int, MutableSet<String>> = HashMap()
     val feedToUsers: MutableMap<String, MutableSet<Int>> = HashMap()
     val feedItems: MutableMap<String, Item> = HashMap()
+    val users: MutableMap<Int, User> = HashMap()
 
 
-    fun addRss(userId: Int, rss: String): Boolean{
-        val setFeeds = userToFeeds.getOrPut(userId){ emptySet<String>().toMutableSet() }
+    fun addRss(user: User, rss: String): Boolean{
+        val setFeeds = userToFeeds.getOrPut(user.id){ emptySet<String>().toMutableSet() }
         setFeeds.add(rss)
 
         val setUsers = feedToUsers.getOrPut(rss){ emptySet<Int>().toMutableSet() }
-        setUsers.add(userId)
+        setUsers.add(user.id)
 
         val i = Item()
         i.link = rss
 
         feedItems.put(rss, i)
+        users.put(user.id, user)
 
         return true
     }
@@ -32,7 +36,16 @@ object Storage {
 
     fun getAllRss() = feedToUsers.keys
 
-    fun getFeed(url: String) = feedItems.get(url)
+    fun getFeed(url: String) = feedItems[url]
+
+    fun updateRss(rss: Rss){
+        val url = rss.channel.link + "feed.xml"
+        feedItems[url] = rss.channel.items.first()
+    }
+
+    fun getAllUsersFor(url: String): List<User> {
+        return feedToUsers[url]!!.map { users[it]!! }
+    }
 
     fun deleteRss(userId: Int, rssPosition: Int){ }
     
@@ -40,5 +53,6 @@ object Storage {
         userToFeeds.clear()
         feedToUsers.clear()
         feedItems.clear()
+        users.clear()
     }
 }

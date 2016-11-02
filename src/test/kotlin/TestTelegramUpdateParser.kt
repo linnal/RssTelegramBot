@@ -1,4 +1,5 @@
 
+import com.erindavide.data.User
 import com.erindavide.db.Storage
 import com.erindavide.parser.TelegramUpdateParser
 import org.junit.Assert
@@ -17,14 +18,14 @@ class TestTelegramUpdateParser{
 
     @Test
     fun testParseUserMessageWithMessageStart(){
-        val response = TelegramUpdateParser.parseUserMessage(1234, "start")
+        val response = TelegramUpdateParser.parseUserMessage(User(1234, "11"), "start")
         Assert.assertTrue(response.contains("To add an rss just write"))
     }
 
     @Test
     fun testParseUserMessageWithMessageAddRss(){
-        TelegramUpdateParser.parseUserMessage(1234, "http://localhost")
-        val response = TelegramUpdateParser.parseUserMessage(1234, "http://erinda")
+        TelegramUpdateParser.parseUserMessage(User(1234, "11"), "http://localhost")
+        val response = TelegramUpdateParser.parseUserMessage(User(1234, "11"), "http://erinda")
         Assert.assertEquals("[http://localhost, http://erinda]", response)
     }
 

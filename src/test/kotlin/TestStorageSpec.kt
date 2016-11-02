@@ -1,4 +1,5 @@
 
+import com.erindavide.data.User
 import com.erindavide.db.Storage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -22,7 +23,7 @@ class TestStorageSpec {
         val userId = 1234
         val rss = "http://local.com"
 
-        assertTrue(Storage.addRss(userId, rss))
+        assertTrue(Storage.addRss(User(userId, "11"), rss))
     }
 
     @Test
@@ -31,8 +32,8 @@ class TestStorageSpec {
         val first_rss = "http://first/local.com"
         val second_rss = "http://second/local.com"
 
-        Storage.addRss(userId, first_rss)
-        Storage.addRss(userId, second_rss)
+        Storage.addRss(User(userId, "11"), first_rss)
+        Storage.addRss(User(userId, "11"), second_rss)
 
         assertEquals(2, Storage.getAllRssFor(userId).size)
     }

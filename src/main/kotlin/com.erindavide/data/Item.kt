@@ -20,4 +20,6 @@ class Item(){
 
     @XmlElement(name="pubDate")
     var pubDate: String? = null
+
+    override fun toString() = "title: $title link: $link pubDate: $pubDate"
 }
