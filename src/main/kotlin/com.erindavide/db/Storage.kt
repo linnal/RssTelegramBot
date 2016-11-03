@@ -24,7 +24,7 @@ object Storage {
             val stmt = createStatement()
 
             val create_table_user = """CREATE TABLE IF NOT EXISTS BOTUSER
-                                    (ID INT      NOT NULL,
+                                    (ID integer      NOT NULL,
                                      FIRSTNAME varchar(45),
                                      CHAT_ID varchar(45)           NOT NULL,
                                      PRIMARY KEY (ID)  );"""
@@ -170,7 +170,7 @@ object Storage {
     private fun addOrUpdateUser(user: User){
         withConnection {
             val stmt = createStatement()
-            val insertUser = "INSERT INTO BOTUSER VALUES ( $user.id , $user.firstName, $user.chatid);"
+            val insertUser = "INSERT INTO BOTUSER VALUES ( $user.id , '$user.firstName', $user.chatid);"
 
             stmt.executeQuery(insertUser)
         }
@@ -182,7 +182,7 @@ object Storage {
             val updateFeed = "UPDATE FEED " +
                     " SET TITLE=${feed.title} " +
                     " WHERE URL=${feed.link}";
-            val insertFeed = "INSERT INTO BOTUSER VALUES ( ${feed.link} , ${feed.title});"
+            val insertFeed = "INSERT INTO BOTUSER VALUES ( '${feed.link}' , '${feed.title}');"
 
             stmt.executeQuery(updateFeed)
             stmt.executeQuery(insertFeed)
@@ -194,7 +194,7 @@ object Storage {
             val stmt = createStatement()
             val getFeed = "SELECT * FROM ITEM WHERE ID_BOTUSER=${userId} AND ID_FEED=${feedId}"
             val insertFeed = "INSERT INTO BOTUSERFEED " +
-                    " VALUES ( null, ${userId} , ${feedId});"
+                    " VALUES ( null, ${userId} , '${feedId}');"
 
             if(!stmt.executeQuery(getFeed).first()){
                 stmt.executeQuery(insertFeed)
