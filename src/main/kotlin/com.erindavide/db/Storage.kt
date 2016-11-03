@@ -168,10 +168,11 @@ object Storage {
 
 
     private fun addOrUpdateUser(user: User){
+        println("======== addOrUpdateUser =======")
         withConnection {
             val stmt = createStatement()
             val insertUser = "INSERT INTO BOTUSER VALUES ( $user.id , '$user.firstName', $user.chatid);"
-
+            print(insertUser)
             stmt.executeQuery(insertUser)
         }
     }
