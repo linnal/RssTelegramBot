@@ -24,23 +24,26 @@ object Storage {
             val stmt = createStatement()
 
             val create_table_user = """CREATE TABLE IF NOT EXISTS BOTUSER
-                                    (ID INT PRIMARY KEY     NOT NULL,
-                                     FIRSTNAME TEXT,
-                                     CHAT_ID TEXT           NOT NULL);"""
+                                    (ID INT      NOT NULL,
+                                     FIRSTNAME varchar(45),
+                                     CHAT_ID varchar(45)           NOT NULL,
+                                     PRIMARY KEY (ID)  );"""
             stmt.executeUpdate(create_table_user)
 
             val create_table_feed = """CREATE TABLE IF NOT EXISTS FEED
-                                    (URL TEXT PRIMARY KEY,
-                                    TITLE TEXT,
-                                    URL_ITEM TEXT,
-                                    TITLE_ITEM TEXT );"""
+                                    (URL varchar(45),
+                                    TITLE varchar(200),
+                                    URL_ITEM varchar(200),
+                                    TITLE_ITEM varchar(45),
+                                    PRIMARY KEY (URL)   );"""
             stmt.execute(create_table_feed)
 
 
             val create_table_userfeed = """CREATE TABLE IF NOT EXISTS BOTUSERFEED
-                                        (ID SERIAL PRIMARY KEY ,
+                                        (ID SERIAL ,
                                          ID_BOTUSER INT NOT NULL,
-                                         ID_FEED TEXT NOT NULL  );"""
+                                         ID_FEED varchar(45) NOT NULL  ,
+                                         PRIMARY KEY (ID)  );"""
             stmt.execute(create_table_userfeed)
 
         }
