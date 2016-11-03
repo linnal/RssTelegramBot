@@ -168,10 +168,9 @@ object Storage {
 
 
     private fun addOrUpdateUser(user: User){
-        println("======== addOrUpdateUser =======")
         withConnection {
             val stmt = createStatement()
-            val insertUser = "INSERT INTO BOTUSER VALUES ( $user.id , '$user.firstName', $user.chatid);"
+            val insertUser = "INSERT INTO BOTUSER VALUES ( ${user.id} , '${user.firstName}', ${user.chatid});"
             print(insertUser)
             stmt.executeQuery(insertUser)
         }
@@ -193,9 +192,9 @@ object Storage {
     private fun addUserFeed(userId: Int, feedId: String){
         withConnection {
             val stmt = createStatement()
-            val getFeed = "SELECT * FROM ITEM WHERE ID_BOTUSER=${userId} AND ID_FEED=${feedId}"
+            val getFeed = "SELECT * FROM ITEM WHERE ID_BOTUSER=$userId AND ID_FEED=$feedId"
             val insertFeed = "INSERT INTO BOTUSERFEED " +
-                    " VALUES ( null, ${userId} , '${feedId}');"
+                    " VALUES ( null, $userId , '$feedId');"
 
             if(!stmt.executeQuery(getFeed).first()){
                 stmt.executeQuery(insertFeed)
@@ -208,7 +207,7 @@ object Storage {
             val stmt = createStatement()
             val updateFeed = "UPDATE FEED " +
                     " SET TITLE_ITEM=${item.title}, URL_ITEM=${item.link} " +
-                    " WHERE URL=${feedId}";
+                    " WHERE URL=$feedId";
 
             stmt.executeQuery(updateFeed)
         }
