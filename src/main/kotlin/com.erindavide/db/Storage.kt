@@ -167,7 +167,7 @@ object Storage {
     private fun addOrUpdateUser(user: User){
         withConnection {
             val stmt = createStatement()
-            val insertUser = "INSERT INTO BOTUSER VALUES ( ${user.id} , ${user.chatid}, ${user.firstName});"
+            val insertUser = "INSERT INTO BOTUSER VALUES ( $user.id , $user.firstName, $user.chatid);"
 
             stmt.executeQuery(insertUser)
         }
