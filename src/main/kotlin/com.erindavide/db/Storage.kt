@@ -170,22 +170,29 @@ object Storage {
     private fun addOrUpdateUser(user: User){
         withConnection {
             val stmt = createStatement()
-            val insertUser = "INSERT INTO BOTUSER VALUES ( ${user.id} , '${user.firstName}', ${user.chatid});"
-            print(insertUser)
-            stmt.executeQuery(insertUser)
+            val getUser = "SELECT * FROM BOTUSER WHERE ID=${user.id}"
+            if( !stmt.executeQuery(getUser).first() ){
+                val insertUser = "INSERT INTO BOTUSER VALUES ( ${user.id} , '${user.firstName}', ${user.chatid});"
+                print(insertUser)
+                stmt.executeQuery(insertUser)
+            }
         }
     }
 
     private fun addOrUpdateFeed(feed: Channel){
         withConnection {
             val stmt = createStatement()
-            val updateFeed = "UPDATE FEED " +
-                    " SET TITLE=${feed.title} " +
-                    " WHERE URL=${feed.link}";
-            val insertFeed = "INSERT INTO BOTUSER VALUES ( '${feed.link}' , '${feed.title}');"
+            val getFeed = "SELECT * FROM FEED WHERE URL=${feed.link}"
+            if( stmt.executeQuery(getFeed).first() ) {
+                val updateFeed = "UPDATE FEED " +
+                        " SET TITLE=${feed.title} " +
+                        " WHERE URL=${feed.link}";
+                stmt.executeQuery(updateFeed)
 
-            stmt.executeQuery(updateFeed)
-            stmt.executeQuery(insertFeed)
+            }else{
+                val insertFeed = "INSERT INTO BOTUSER VALUES ( '${feed.link}' , '${feed.title}');"
+                stmt.executeQuery(insertFeed)
+            }
         }
     }
 
