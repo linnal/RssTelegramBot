@@ -15,8 +15,10 @@ class RssHandler() : TelegramLongPollingBot() {
         val userId = update.message.from.id
         val text = update.message.text
         val chatId = update.message.chatId.toString()
+        val firstName = update.message.from.firstName
+        print(update.message.toString())
 
-        val respose = TelegramUpdateParser.parseUserMessage( User(userId, chatId), text )
+        val respose = TelegramUpdateParser.parseUserMessage( User(userId, chatId, firstName), text )
         sendMessageTo(chatId, respose)
 
     }
@@ -25,7 +27,7 @@ class RssHandler() : TelegramLongPollingBot() {
     fun sendMessageTo(chatId: String, message:String){
         val send = SendMessage()
         send.chatId = chatId
-        send.setText(message)
+        send.text = message
         sendMessage(send)
     }
 

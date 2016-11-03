@@ -17,10 +17,10 @@ class Rss(){
 
 @XmlAccessorType(XmlAccessType.FIELD)
 class Channel{
-    val title: String = ""
-    val lastBuildDate: String = ""
-    val pubDate: String = ""
-    val link: String = ""
+    var title: String = ""
+    var lastBuildDate: String = ""
+    var pubDate: String = ""
+    var link: String = ""
     @XmlElement(name = "item")
     val items = emptyList<Item>().toMutableList()
 }

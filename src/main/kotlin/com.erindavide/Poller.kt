@@ -14,19 +14,14 @@ object Poller {
         val allFeeds = Storage.getAllRss()
         for(url in allFeeds){
             val rss = RssFeedParser.parseFeed(url)
-            val existingRss = Storage.getFeed(url)
-            val publishedRss = rss?.channel?.items?.first()?.link
+            val lastItemSaved = Storage.getFeed(url)
+            val publishedItem = rss?.channel?.items?.first()
 
-            if(existingRss == null || existingRss.pubDate.isNullOrEmpty()){
-                Storage.updateRss(rss!!)
+            if(! update_available(publishedItem?.link, lastItemSaved!!.link!!)){
                 continue
             }
 
-            if(! update_available(publishedRss, existingRss!!.link!!)){
-                continue
-            }
-
-            Storage.updateRss(rss!!)
+            Storage.updateFeedItem(rss!!)
             result.add(url)
         }
 

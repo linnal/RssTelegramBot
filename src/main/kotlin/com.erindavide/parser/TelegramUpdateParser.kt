@@ -12,6 +12,7 @@ object TelegramUpdateParser {
         when(text){
             "/start", "/help" -> return startMessage()
             "/delete" -> return "TODO"
+            "/delete_all" -> Storage.deleteAll()
             else -> if(text.contains("http")) {
                 Storage.addRss(user, text)
             }
@@ -24,7 +25,7 @@ object TelegramUpdateParser {
                 "To add an rss just write the #rss_url you want to get notifications \n"+
                 "/list - to see the list of rss you are registered \n" +
                 "/delete #rss_nr - taken from your rss list to delete a single rss\n" +
-                "/delte_all - to delete all the rss\n" +
+                "/delete_all - to delete all the rss\n" +
                 "/help - to see the list of possible commands"
     }
 }

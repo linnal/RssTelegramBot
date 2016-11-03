@@ -1,62 +1,213 @@
 package com.erindavide.db
 
+import com.erindavide.data.Channel
 import com.erindavide.data.Item
 import com.erindavide.data.Rss
 import com.erindavide.data.User
 import com.heroku.sdk.jdbc.DatabaseUrl
 import java.sql.Connection
-import java.sql.SQLException
-import java.util.*
 
 /**
  * Created by linnal on 10/31/16.
  */
 object Storage {
 
-    val userToFeeds: MutableMap<Int, MutableSet<String>> = HashMap()
-    val feedToUsers: MutableMap<String, MutableSet<Int>> = HashMap()
-    val feedItems: MutableMap<String, Item> = HashMap()
-    val users: MutableMap<Int, User> = HashMap()
 
-
-    fun addRss(user: User, rss: String): Boolean{
-        val setFeeds = userToFeeds.getOrPut(user.id){ emptySet<String>().toMutableSet() }
-        setFeeds.add(rss)
-
-        val setUsers = feedToUsers.getOrPut(rss){ emptySet<Int>().toMutableSet() }
-        setUsers.add(user.id)
-
-        val i = Item()
-        i.link = rss
-
-        feedItems.put(rss, i)
-        users.put(user.id, user)
-
-        return true
+    fun withConnection(f: Connection.() -> Unit){
+        val connection = DatabaseUrl.extract(true).connection
+        connection.f()
+        connection.close()
     }
 
-    fun getAllRssFor(userId: Int) = userToFeeds.getOrElse(userId){ emptySet<String>() }
+    fun init(){
+        withConnection {
+            val stmt = createStatement()
 
-    fun getAllRss() = feedToUsers.keys
+            val create_table_user = """CREATE TABLE IF NOT EXISTS BOTUSER
+                                    (ID INT PRIMARY KEY     NOT NULL,
+                                     FIRSTNAME TEXT,
+                                     CHAT_ID TEXT           NOT NULL);"""
+            stmt.executeUpdate(create_table_user)
 
-    fun getFeed(url: String) = feedItems[url]
+            val create_table_feed = """CREATE TABLE IF NOT EXISTS FEED
+                                    (URL TEXT PRIMARY KEY,
+                                    TITLE TEXT,
+                                    URL_ITEM TEXT,
+                                    TITLE_ITEM TEXT );"""
+            stmt.execute(create_table_feed)
 
-    fun updateRss(rss: Rss){
+
+            val create_table_userfeed = """CREATE TABLE IF NOT EXISTS BOTUSERFEED
+                                        (ID SERIAL PRIMARY KEY ,
+                                         ID_BOTUSER INT NOT NULL,
+                                         ID_FEED TEXT NOT NULL  );"""
+            stmt.execute(create_table_userfeed)
+
+        }
+    }
+
+
+
+
+    fun addRss(user: User, rss: String) {
+
+        addOrUpdateUser(user)
+
+        val channel = Channel()
+        channel.link = rss
+        addOrUpdateFeed(channel)
+
+        addUserFeed(user.id, rss)
+    }
+
+    fun getAllRssFor(userId: Int): List<String> {
+        val rssList = emptyList<String>().toMutableList()
+
+        val getRssForUser = "SELECT URL FROM BOTUSERFEED WHERE ID_BOTUSER=$userId"
+
+        val connection = DatabaseUrl.extract(true).connection
+        val stmt = connection.createStatement()
+        val result = stmt.executeQuery(getRssForUser)
+        while(result.next()){
+            rssList.add(result.getString("url"))
+        }
+        connection.close()
+
+        return rssList
+    }
+
+    fun getAllRss(): List<String>{
+        val rssList = emptyList<String>().toMutableList()
+
+        val getRssForUser = "SELECT URL FROM FEED"
+
+        val connection = DatabaseUrl.extract(true).connection
+        val stmt = connection.createStatement()
+        val result = stmt.executeQuery(getRssForUser)
+        while(result.next()){
+            rssList.add(result.getString("URL"))
+        }
+        connection.close()
+
+        return rssList
+    }
+
+    fun getFeed(url: String): Item?{
+        var item: Item? = null
+
+        val getRssForUser = "SELECT * FROM FEED WHERE URL=$url"
+
+        val connection = DatabaseUrl.extract(true).connection
+        val stmt = connection.createStatement()
+        val result = stmt.executeQuery(getRssForUser)
+        if(result.next()){
+            item = Item()
+            item.link = result.getString("URL_ITEM")
+            item.title = result.getString("TITLE_ITEM")
+        }
+        connection.close()
+
+        return item
+    }
+
+    fun updateFeedItem(rss: Rss){
         val url = rss.channel.link + "feed.xml"
-        feedItems[url] = rss.channel.items.first()
+        val publishedItem = rss.channel.items.first()
+
+        updateItem(url, publishedItem)
     }
 
     fun getAllUsersFor(url: String): List<User> {
-        return feedToUsers[url]!!.map { users[it]!! }
+
+        val userList = emptyList<User>().toMutableList()
+
+        val getRssForUser = """SELECT ID_BOTUSER, CHAT_ID, FIRSTNAME
+                             FROM BOTUSERFEED, BOTUSER
+                             WHERE ID_FEED=$url AND BOTUSERFEED.ID_BOTUSER = BOTUSER.ID;"""
+
+        val connection = DatabaseUrl.extract(true).connection
+        val stmt = connection.createStatement()
+        val result = stmt.executeQuery(getRssForUser)
+        while(result.next()){
+            userList.add(User( result.getInt("ID_BOTUSER"),
+                              result.getString("CHAT_ID"),
+                              result.getString("FIRSTNAME")))
+        }
+        connection.close()
+
+        return userList
     }
 
     fun deleteRss(userId: Int, rssPosition: Int){ }
-    
+
+    fun deleteRss(url: String){
+        val deleteFeed = """DELETE FROM FEED
+                          WHERE URL=$url; """
+
+        val deleteUserFeed = """DELETE FROM BOTUSERFEED
+                                WHERE ID_FEED=$url; """
+        withConnection {
+            val stmt = createStatement()
+            stmt.executeQuery(deleteFeed)
+            stmt.executeQuery(deleteUserFeed)
+        }
+    }
+
     fun deleteAll() {
-        userToFeeds.clear()
-        feedToUsers.clear()
-        feedItems.clear()
-        users.clear()
+        withConnection {
+            val stmt = createStatement()
+            stmt.executeQuery("DELETE FROM FEED")
+            stmt.executeQuery("DELETE FROM BOTUSERFEED")
+        }
+    }
+
+
+
+
+    private fun addOrUpdateUser(user: User){
+        withConnection {
+            val stmt = createStatement()
+            val insertUser = "INSERT INTO BOTUSER VALUES ( ${user.id} , ${user.chatid}, ${user.firstName});"
+
+            stmt.executeQuery(insertUser)
+        }
+    }
+
+    private fun addOrUpdateFeed(feed: Channel){
+        withConnection {
+            val stmt = createStatement()
+            val updateFeed = "UPDATE FEED " +
+                    " SET TITLE=${feed.title} " +
+                    " WHERE URL=${feed.link}";
+            val insertFeed = "INSERT INTO BOTUSER VALUES ( ${feed.link} , ${feed.title});"
+
+            stmt.executeQuery(updateFeed)
+            stmt.executeQuery(insertFeed)
+        }
+    }
+
+    private fun addUserFeed(userId: Int, feedId: String){
+        withConnection {
+            val stmt = createStatement()
+            val getFeed = "SELECT * FROM ITEM WHERE ID_BOTUSER=${userId} AND ID_FEED=${feedId}"
+            val insertFeed = "INSERT INTO BOTUSERFEED " +
+                    " VALUES ( null, ${userId} , ${feedId});"
+
+            if(!stmt.executeQuery(getFeed).first()){
+                stmt.executeQuery(insertFeed)
+            }
+        }
+    }
+
+    private fun updateItem(feedId: String, item: Item){
+        withConnection {
+            val stmt = createStatement()
+            val updateFeed = "UPDATE FEED " +
+                    " SET TITLE_ITEM=${item.title}, URL_ITEM=${item.link} " +
+                    " WHERE URL=${feedId}";
+
+            stmt.executeQuery(updateFeed)
+        }
     }
 
 }
