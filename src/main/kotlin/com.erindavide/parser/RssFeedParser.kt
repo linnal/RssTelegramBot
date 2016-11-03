@@ -1,7 +1,6 @@
 package com.erindavide.parser
 
 import com.erindavide.data.Rss
-import com.erindavide.db.Storage
 import java.net.MalformedURLException
 import java.net.URL
 import javax.xml.bind.JAXBContext
@@ -22,10 +21,10 @@ object RssFeedParser {
             return unmarshaller.unmarshal(_url) as Rss
 
         }catch(e: UnmarshalException){
-            Storage.deleteRss(url)
+            println("DEBUG: ${e.message}")
             return null
         }catch(e: MalformedURLException){
-            Storage.deleteRss(url)
+            println("DEBUG: ${e.message}")
             return null
         }
 

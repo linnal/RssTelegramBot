@@ -31,7 +31,7 @@ object Storage {
             stmt.executeUpdate(create_table_user)
 
             val create_table_feed = """CREATE TABLE IF NOT EXISTS FEED
-                                    (URL varchar(45),
+                                    (URL varchar(200),
                                     TITLE varchar(200),
                                     URL_ITEM varchar(200),
                                     TITLE_ITEM varchar(45),
@@ -66,13 +66,14 @@ object Storage {
     fun getAllRssFor(userId: Int): List<String> {
         val rssList = emptyList<String>().toMutableList()
 
-        val getRssForUser = "SELECT ID_FEED FROM BOTUSERFEED WHERE ID_BOTUSER=$userId"
+        val getRssForUser = "SELECT ID_FEED FROM BOTUSERFEED WHERE ID_BOTUSER=?"
 
         val connection = DatabaseUrl.extract(true).connection
-        val stmt = connection.createStatement()
-        val result = stmt.executeQuery(getRssForUser)
+        val stmt = connection.prepareStatement(getRssForUser)
+        stmt.setInt(1, userId)
+        val result = stmt.executeQuery()
         while(result.next()){
-            rssList.add(result.getString("url"))
+            rssList.add(result.getString("ID_FEED"))
         }
         connection.close()
 
@@ -98,11 +99,12 @@ object Storage {
     fun getFeed(url: String): Item?{
         var item: Item? = null
 
-        val getRssForUser = "SELECT * FROM FEED WHERE URL=$url"
+        val getRssForUser = "SELECT * FROM FEED WHERE URL=?"
 
         val connection = DatabaseUrl.extract(true).connection
-        val stmt = connection.createStatement()
-        val result = stmt.executeQuery(getRssForUser)
+        val stmt = connection.prepareStatement(getRssForUser)
+        stmt.setString(1, url)
+        val result = stmt.executeQuery()
         if(result.next()){
             item = Item()
             item.link = result.getString("URL_ITEM")
@@ -113,11 +115,29 @@ object Storage {
         return item
     }
 
-    fun updateFeedItem(rss: Rss){
-        val url = rss.channel.link + "feed.xml"
-        val publishedItem = rss.channel.items.first()
+    fun getChannelInfo(url: String): Channel{
+        var channel: Channel = Channel()
 
-        updateItem(url, publishedItem)
+        val getRssForUser = "SELECT * FROM FEED WHERE URL=?"
+
+        val connection = DatabaseUrl.extract(true).connection
+        val stmt = connection.prepareStatement(getRssForUser)
+        stmt.setString(1, url)
+        val result = stmt.executeQuery()
+        if(result.next()){
+            channel.title = result.getString("TITLE")
+            val item = Item()
+            item.link = result.getString("URL_ITEM")
+            item.title = result.getString("TITLE_ITEM")
+            channel.items.add(item)
+        }
+        connection.close()
+
+        return channel
+    }
+
+    fun updateFeedItem(url:String, rss: Rss){
+        updateItem(url, rss.channel)
     }
 
     fun getAllUsersFor(url: String): List<User> {
@@ -126,11 +146,12 @@ object Storage {
 
         val getRssForUser = """SELECT ID_BOTUSER, CHAT_ID, FIRSTNAME
                              FROM BOTUSERFEED, BOTUSER
-                             WHERE ID_FEED=$url AND BOTUSERFEED.ID_BOTUSER = BOTUSER.ID;"""
+                             WHERE ID_FEED=? AND BOTUSERFEED.ID_BOTUSER = BOTUSER.ID;"""
 
         val connection = DatabaseUrl.extract(true).connection
-        val stmt = connection.createStatement()
-        val result = stmt.executeQuery(getRssForUser)
+        val stmt = connection.prepareStatement(getRssForUser)
+        stmt.setString(1, url)
+        val result = stmt.executeQuery()
         while(result.next()){
             userList.add(User( result.getInt("ID_BOTUSER"),
                               result.getString("CHAT_ID"),
@@ -141,26 +162,30 @@ object Storage {
         return userList
     }
 
-    fun deleteRss(userId: Int, rssPosition: Int){ }
-
-    fun deleteRss(url: String){
+    fun deleteRss(userId: Int, url: String){
         val deleteFeed = """DELETE FROM FEED
-                          WHERE URL=$url; """
+                          WHERE URL=?; """
 
         val deleteUserFeed = """DELETE FROM BOTUSERFEED
-                                WHERE ID_FEED=$url; """
+                                WHERE ID_FEED=? AND ID_BOTUSER=?; """
         withConnection {
-            val stmt = createStatement()
-            stmt.executeQuery(deleteFeed)
-            stmt.executeQuery(deleteUserFeed)
+            var stmt = prepareStatement(deleteFeed)
+            stmt.setString(1, url)
+            stmt.execute()
+
+            stmt = prepareStatement(deleteUserFeed)
+            stmt.setString(1, url)
+            stmt.setInt(2, userId)
+            stmt.execute()
         }
     }
 
-    fun deleteAll() {
+
+    fun deleteAll(userId: Int) {
         withConnection {
-            val stmt = createStatement()
-            stmt.executeQuery("DELETE FROM FEED")
-            stmt.executeQuery("DELETE FROM BOTUSERFEED")
+            val stmt = prepareStatement("DELETE FROM BOTUSERFEED WHERE ID_BOTUSER=?")
+            stmt.setInt(1, userId)
+            stmt.execute()
         }
     }
 
@@ -169,54 +194,89 @@ object Storage {
 
     private fun addOrUpdateUser(user: User){
         withConnection {
-            val stmt = createStatement()
-            val getUser = "SELECT * FROM BOTUSER WHERE ID=${user.id}"
-            if( !stmt.executeQuery(getUser).first() ){
-                val insertUser = "INSERT INTO BOTUSER VALUES ( ${user.id} , '${user.firstName}', ${user.chatid});"
-                print(insertUser)
-                stmt.executeQuery(insertUser)
+            val getUser = "SELECT * FROM BOTUSER WHERE ID=?"
+
+            var stmt = prepareStatement(getUser)
+            stmt.setInt(1, user.id)
+            val res = stmt.executeQuery()
+
+            if( !res.next() ){
+                val insertUser = "INSERT INTO BOTUSER VALUES ( ? ,? ,? );"
+                stmt = prepareStatement(insertUser)
+                stmt.setInt(1, user.id)
+                stmt.setString(2, user.firstName)
+                stmt.setString(3, user.chatid)
+                stmt.execute()
             }
         }
     }
 
     private fun addOrUpdateFeed(feed: Channel){
         withConnection {
-            val stmt = createStatement()
-            val getFeed = "SELECT * FROM FEED WHERE URL=${feed.link}"
-            if( stmt.executeQuery(getFeed).first() ) {
+            val getFeed = "SELECT * FROM FEED WHERE URL=?"
+
+            var stmt = prepareStatement(getFeed)
+            stmt.setString(1, feed.link)
+            val res = stmt.executeQuery()
+            if( res.next() ) {
                 val updateFeed = "UPDATE FEED " +
-                        " SET TITLE=${feed.title} " +
-                        " WHERE URL=${feed.link}";
-                stmt.executeQuery(updateFeed)
+                        " SET TITLE=? " +
+                        " WHERE URL=?";
+
+                stmt = prepareStatement(updateFeed)
+                stmt.setString(1, feed.title)
+                stmt.setString(2, feed.link)
+                stmt.executeUpdate()
 
             }else{
-                val insertFeed = "INSERT INTO BOTUSER VALUES ( '${feed.link}' , '${feed.title}');"
-                stmt.executeQuery(insertFeed)
+                val insertFeed = "INSERT INTO FEED (URL, TITLE) VALUES ( ? , ?);"
+                stmt = prepareStatement(insertFeed)
+                stmt.setString(1, feed.link)
+                stmt.setString(2, feed.title)
+                stmt.execute()
             }
+
         }
     }
 
     private fun addUserFeed(userId: Int, feedId: String){
         withConnection {
-            val stmt = createStatement()
-            val getFeed = "SELECT * FROM ITEM WHERE ID_BOTUSER=$userId AND ID_FEED=$feedId"
-            val insertFeed = "INSERT INTO BOTUSERFEED " +
-                    " VALUES ( null, $userId , '$feedId');"
+            val getFeed = "SELECT * FROM BOTUSERFEED WHERE ID_BOTUSER=? AND ID_FEED=?"
+            val insertFeed = """INSERT INTO BOTUSERFEED (ID_BOTUSER, ID_FEED)
+                                VALUES ( ? , ?);"""
 
-            if(!stmt.executeQuery(getFeed).first()){
-                stmt.executeQuery(insertFeed)
+            var stmt = prepareStatement(getFeed)
+            stmt.setInt(1, userId)
+            stmt.setString(2, feedId)
+
+
+            var res = stmt.executeQuery()
+            if(!res.next()){
+                stmt = prepareStatement(insertFeed)
+                stmt.setInt(1, userId)
+                stmt.setString(2, feedId)
+
+                stmt.execute()
             }
         }
     }
 
-    private fun updateItem(feedId: String, item: Item){
+    private fun updateItem(url: String, channel: Channel){
         withConnection {
-            val stmt = createStatement()
+            val item = channel.items.first()
             val updateFeed = "UPDATE FEED " +
-                    " SET TITLE_ITEM=${item.title}, URL_ITEM=${item.link} " +
-                    " WHERE URL=$feedId";
+                    " SET TITLE_ITEM=?, URL_ITEM=?, TITLE=? " +
+                    " WHERE URL=?";
 
-            stmt.executeQuery(updateFeed)
+            val stmt = prepareStatement(updateFeed)
+            stmt.setString(1, item.title)
+            stmt.setString(2, item.link)
+            stmt.setString(3, channel.title)
+            stmt.setString(4, url)
+
+            stmt.execute()
+
+
         }
     }
 

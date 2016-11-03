@@ -17,9 +17,12 @@ fun main(args: Array<String>){
             val rssList = Poller.checkForUpdates()
             for( url in rssList ){
                 val users = Storage.getAllUsersFor(url)
-                var lastPublishedItem = Storage.getFeed(url)
+                var channelInfo = Storage.getChannelInfo(url)
                 for(user in users){
-                    handler.sendMessageTo(user.chatid, lastPublishedItem.toString())
+                    handler.sendMessageTo(user.chatid,
+                            "Hey ${user.firstName}, \n " +
+                            "${channelInfo.title} published: ${channelInfo.items.first().title}. \n " +
+                            "Check it out ${channelInfo.items.first().link}")
                 }
             }
         }
