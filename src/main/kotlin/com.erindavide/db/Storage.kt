@@ -63,7 +63,7 @@ object Storage {
     fun getAllRssFor(userId: Int): List<String> {
         val rssList = emptyList<String>().toMutableList()
 
-        val getRssForUser = "SELECT URL FROM BOTUSERFEED WHERE ID_BOTUSER=$userId"
+        val getRssForUser = "SELECT ID_FEED FROM BOTUSERFEED WHERE ID_BOTUSER=$userId"
 
         val connection = DatabaseUrl.extract(true).connection
         val stmt = connection.createStatement()
