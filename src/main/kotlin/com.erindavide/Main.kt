@@ -4,6 +4,9 @@ import com.erindavide.db.Storage
 import org.telegram.telegrambots.TelegramBotsApi
 import org.telegram.telegrambots.exceptions.TelegramApiException
 import org.telegram.telegrambots.logging.BotLogger
+import java.net.ServerSocket
+import java.net.SocketTimeoutException
+import java.nio.charset.Charset
 
 val LOGTAG = "Tag_Main"
 
@@ -32,6 +35,23 @@ fun main(args: Array<String>){
     }
 
     Storage.init()
+
+    val PORT = Integer.parseInt( System.getenv("PORT") ?: "3000" )
+
+    val socket = ServerSocket(PORT)
+    socket.soTimeout = 10000
+    while(true){
+        try {
+            val conn = socket.accept()
+            print(" === socket connection === $PORT")
+            conn.outputStream.write("200 OK\n".toByteArray(Charset.defaultCharset()))
+            conn.outputStream.flush()
+            conn.outputStream.close()
+            conn.close()
+        }catch (e: SocketTimeoutException){
+            println("DEBUG ${e.message}")
+        }
+    }
 
 }
 
