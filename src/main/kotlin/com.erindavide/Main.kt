@@ -4,8 +4,9 @@ import com.erindavide.db.Storage
 import org.telegram.telegrambots.TelegramBotsApi
 import org.telegram.telegrambots.exceptions.TelegramApiException
 import org.telegram.telegrambots.logging.BotLogger
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.net.ServerSocket
-import java.net.SocketTimeoutException
 import java.nio.charset.Charset
 
 val LOGTAG = "Tag_Main"
@@ -38,19 +39,27 @@ fun main(args: Array<String>){
 
     val PORT = Integer.parseInt( System.getenv("PORT") ?: "3000" )
 
-    val socket = ServerSocket(PORT)
-    socket.soTimeout = 10000
+    val socket = ServerSocket()
+    socket.bind(InetSocketAddress(InetAddress.getLocalHost(), PORT))
+
+
     while(true){
-        try {
-            val conn = socket.accept()
-            print(" === socket connection === $PORT")
-            conn.outputStream.write("200 OK\n".toByteArray(Charset.defaultCharset()))
-            conn.outputStream.flush()
-            conn.outputStream.close()
-            conn.close()
-        }catch (e: SocketTimeoutException){
-            println("DEBUG ${e.message}")
+        println(" === before socket accept connection === $PORT")
+        val conn = socket.accept()
+        println(" === after socket accept socket connection === $PORT")
+        while( conn.inputStream.available() > 0 ){
+            conn.inputStream.read()
         }
+        println(" === conn write === $PORT")
+
+        conn.outputStream.write("200 OK\n".toByteArray(Charset.defaultCharset()))
+        println(" === conn flush === $PORT")
+
+        conn.outputStream.flush()
+        println(" === conn out stream close === $PORT")
+        conn.outputStream.close()
+        println(" === conn  close === $PORT")
+        conn.close()
     }
 
 }
