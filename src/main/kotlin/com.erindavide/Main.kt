@@ -35,7 +35,7 @@ fun main(args: Array<String>){
         BotLogger.error(LOGTAG, e)
     }
 
-
+    MySocket.create()
 }
 
 

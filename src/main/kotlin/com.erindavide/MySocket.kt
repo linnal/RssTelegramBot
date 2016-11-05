@@ -15,21 +15,15 @@ object MySocket{
 
 
         while (true) {
-            println(" === before socket accept connection === $PORT")
             val conn = socket.accept()
-            println(" === after socket accept socket connection === $PORT")
             while (conn.inputStream.available() > 0) {
                 conn.inputStream.read()
             }
-            println(" === conn write === $PORT")
 
             conn.outputStream.write("200 OK\n".toByteArray(Charset.defaultCharset()))
-            println(" === conn flush === $PORT")
 
             conn.outputStream.flush()
-            println(" === conn out stream close === $PORT")
             conn.outputStream.close()
-            println(" === conn  close === $PORT")
             conn.close()
         }
     }
