@@ -3,9 +3,6 @@ package com.erindavide
 import com.erindavide.db.Storage
 import com.erindavide.parser.RssFeedParser
 
-/**
- * Created by linnal on 11/1/16.
- */
 object Poller {
 
     fun checkForUpdates(): List<String>{

@@ -4,14 +4,14 @@ import com.erindavide.db.Storage
 import org.telegram.telegrambots.TelegramBotsApi
 import org.telegram.telegrambots.exceptions.TelegramApiException
 import org.telegram.telegrambots.logging.BotLogger
-import java.net.InetAddress
-import java.net.InetSocketAddress
-import java.net.ServerSocket
-import java.nio.charset.Charset
 
 val LOGTAG = "Tag_Main"
 
 fun main(args: Array<String>){
+
+    Storage.runMigrations()
+
+
     val telegramBotsApi = TelegramBotsApi()
     val handler = RssHandler()
     try {
@@ -35,32 +35,6 @@ fun main(args: Array<String>){
         BotLogger.error(LOGTAG, e)
     }
 
-    Storage.init()
-
-    val PORT = Integer.parseInt( System.getenv("PORT") ?: "3000" )
-
-    val socket = ServerSocket()
-    socket.bind(InetSocketAddress(InetAddress.getLocalHost(), PORT))
-
-
-    while(true){
-        println(" === before socket accept connection === $PORT")
-        val conn = socket.accept()
-        println(" === after socket accept socket connection === $PORT")
-        while( conn.inputStream.available() > 0 ){
-            conn.inputStream.read()
-        }
-        println(" === conn write === $PORT")
-
-        conn.outputStream.write("200 OK\n".toByteArray(Charset.defaultCharset()))
-        println(" === conn flush === $PORT")
-
-        conn.outputStream.flush()
-        println(" === conn out stream close === $PORT")
-        conn.outputStream.close()
-        println(" === conn  close === $PORT")
-        conn.close()
-    }
 
 }
 

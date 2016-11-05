@@ -8,8 +8,8 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot
 
 class RssHandler() : TelegramLongPollingBot() {
 
-    override fun getBotToken() = "277118030:AAEjBgC99F5jDJcFLS6oKYtdmHpw3o4iWYk"
-    override fun getBotUsername() = "linrssbot"
+    override fun getBotToken() = System.getenv("BOT_TOKEN")
+    override fun getBotUsername() = System.getenv("BOT_NAME")
 
     override fun onUpdateReceived(update: Update) {
         val userId = update.message.from.id

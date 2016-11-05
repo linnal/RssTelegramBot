@@ -4,14 +4,13 @@ import com.erindavide.data.Channel
 import com.erindavide.data.Item
 import com.erindavide.data.Rss
 import com.erindavide.data.User
+import com.erindavide.db.migrations.BotUser
+import com.erindavide.db.migrations.BotUserFeed
+import com.erindavide.db.migrations.Feed
 import com.heroku.sdk.jdbc.DatabaseUrl
 import java.sql.Connection
 
-/**
- * Created by linnal on 10/31/16.
- */
 object Storage {
-
 
     fun withConnection(f: Connection.() -> Unit){
         val connection = DatabaseUrl.extract(true).connection
@@ -19,33 +18,12 @@ object Storage {
         connection.close()
     }
 
-    fun init(){
+    fun runMigrations(){
         withConnection {
             val stmt = createStatement()
-
-            val create_table_user = """CREATE TABLE IF NOT EXISTS BOTUSER
-                                    (ID integer      NOT NULL,
-                                     FIRSTNAME varchar(45),
-                                     CHAT_ID varchar(45)           NOT NULL,
-                                     PRIMARY KEY (ID)  );"""
-            stmt.executeUpdate(create_table_user)
-
-            val create_table_feed = """CREATE TABLE IF NOT EXISTS FEED
-                                    (URL varchar(200),
-                                    TITLE varchar(200),
-                                    URL_ITEM varchar(200),
-                                    TITLE_ITEM varchar(45),
-                                    PRIMARY KEY (URL)   );"""
-            stmt.execute(create_table_feed)
-
-
-            val create_table_userfeed = """CREATE TABLE IF NOT EXISTS BOTUSERFEED
-                                        (ID SERIAL ,
-                                         ID_BOTUSER INT NOT NULL,
-                                         ID_FEED varchar(45) NOT NULL  ,
-                                         PRIMARY KEY (ID)  );"""
-            stmt.execute(create_table_userfeed)
-
+            stmt.executeUpdate(BotUser.createTable())
+            stmt.execute(Feed.createTable())
+            stmt.execute(BotUserFeed.createTable())
         }
     }
 
@@ -275,8 +253,6 @@ object Storage {
             stmt.setString(4, url)
 
             stmt.execute()
-
-
         }
     }
 

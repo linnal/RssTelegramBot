@@ -6,9 +6,6 @@ import java.net.URL
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.UnmarshalException
 
-/**
- * Created by linnal on 11/1/16.
- */
 object RssFeedParser {
 
     fun parseFeed(url: String): Rss?{
