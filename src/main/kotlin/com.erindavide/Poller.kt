@@ -13,7 +13,9 @@ object Poller {
             val rss = RssFeedParser.parseFeed(url)
 
             val lastItemSaved = Storage.getFeed(url)
+            println("lastItemSaved = ${lastItemSaved.toString()}")
             val publishedItem = rss?.channel?.items?.first()
+            println("publishedItem = ${publishedItem.toString()}")
 
             if(! update_available(publishedItem?.link, lastItemSaved?.link)){
                 continue

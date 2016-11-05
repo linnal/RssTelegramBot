@@ -18,8 +18,11 @@ fun main(args: Array<String>){
         telegramBotsApi.registerBot(handler)
 
         kotlin.concurrent.timer("poller", false, 1000L, 1000L){
+            println("checking")
+
             val rssList = Poller.checkForUpdates()
             for( url in rssList ){
+                println("checking for $url")
                 val users = Storage.getAllUsersFor(url)
                 var channelInfo = Storage.getChannelInfo(url)
                 for(user in users){
