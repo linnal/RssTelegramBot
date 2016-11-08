@@ -32,7 +32,7 @@ object TelegramUpdateParser {
     private fun startMessage() =  "Here you can follow your favorites rss feeds:\n\n" +
                 "To add an rss just write the #rss_url you want to get notifications \n"+
                 "/list - list all rss feeds you are registered to \n" +
-                "/delete #rss_url - remove notifications for a single rss\n" +
+                "/delete rss_url - remove notifications for a single rss\n" +
                 "/delete_all - remove notifications for all the rss\n" +
                 "/help - to see the list of possible commands" + "\n\n" +
                 "This is still in Beta, feel free to contribute or report bugs here: https://github.com/linnal/RssTelegramBot"
