@@ -34,6 +34,7 @@ object TelegramUpdateParser {
                 "/list - list all rss feeds you are registered to \n" +
                 "/delete #rss_url - remove notifications for a single rss\n" +
                 "/delete_all - remove notifications for all the rss\n" +
-                "/help - to see the list of possible commands"
+                "/help - to see the list of possible commands" + "\n\n" +
+                "This is still in Beta, feel free to contribute or report bugs here: https://github.com/linnal/RssTelegramBot"
 
 }
