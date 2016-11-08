@@ -7,7 +7,7 @@ object Feed{
                     (URL varchar(200),
                     TITLE varchar(200),
                     URL_ITEM varchar(200),
-                    TITLE_ITEM varchar(45),
+                    TITLE_ITEM varchar(400),
 
                     PRIMARY KEY (URL)   );"""
     }

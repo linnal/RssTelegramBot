@@ -202,7 +202,7 @@ object Storage {
                         " WHERE URL=?";
 
                 stmt = prepareStatement(updateFeed)
-                stmt.setString(1, feed.title)
+                stmt.setString(1, feed.title.substring(0, 35) + "...")
                 stmt.setString(2, feed.link)
                 stmt.executeUpdate()
 
@@ -210,7 +210,7 @@ object Storage {
                 val insertFeed = "INSERT INTO FEED (URL, TITLE) VALUES ( ? , ?);"
                 stmt = prepareStatement(insertFeed)
                 stmt.setString(1, feed.link)
-                stmt.setString(2, feed.title)
+                stmt.setString(2, feed.title.substring(0, 35) + "...")
                 stmt.execute()
             }
 
@@ -247,9 +247,9 @@ object Storage {
                     " WHERE URL=?";
 
             val stmt = prepareStatement(updateFeed)
-            stmt.setString(1, item.title)
+            stmt.setString(1, item.title?.substring(0, 35) + "...")
             stmt.setString(2, item.link)
-            stmt.setString(3, channel.title)
+            stmt.setString(3, channel.title.substring(0, 35) + "...")
             stmt.setString(4, url)
 
             stmt.execute()
