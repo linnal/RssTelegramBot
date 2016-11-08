@@ -37,8 +37,6 @@ fun main(args: Array<String>){
     } catch (e: TelegramApiException) {
         BotLogger.error(LOGTAG, e)
     }
-
-    MySocket.create()
 }
 
 
