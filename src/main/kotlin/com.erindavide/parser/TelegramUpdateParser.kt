@@ -1,9 +1,10 @@
 package com.erindavide.parser
 
 import com.erindavide.data.User
-import com.erindavide.db.Storage
+import com.erindavide.interfaces.Storage
 
-object TelegramUpdateParser {
+class TelegramUpdateParser(val storage: Storage) {
+
     fun parseUserMessage(user: User, text: String): String{
         val cmd = text.split(" ")
         when(cmd.first()){
@@ -12,20 +13,24 @@ object TelegramUpdateParser {
 
             "/delete" -> {
                 if(cmd.size == 2){
-                    Storage.deleteRss(user.id, cmd[1])
+                    storage.deleteRss(user.id, cmd[1])
                 }else{
                     return "Missing url feed you want to delete."
                 }
             }
 
-            "/delete_all" -> Storage.deleteAll(user.id)
+            "/delete_all" -> storage.deleteAll(user.id)
 
             else -> if(text.contains("http")) {
-                Storage.addRss(user, text)
-            }
+                        if (text.startsWith("http")) {
+                            storage.addRss(user, text)
+                        } else {
+                            return "Rss URL is not valid"
+                        }
+                    }
         }
 
-        val rssList = Storage.getAllRssFor(user.id).joinToString("\n")
+        val rssList = storage.getAllRssFor(user.id).joinToString("\n")
         return "Rss you are follwing: \n" + (if(rssList.length > 1) rssList else "Nothing found")
     }
 

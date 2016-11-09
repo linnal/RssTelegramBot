@@ -1,6 +1,7 @@
 package com.erindavide
 
 import com.erindavide.data.User
+import com.erindavide.db.DbStorage
 import com.erindavide.parser.TelegramUpdateParser
 import org.telegram.telegrambots.api.methods.send.SendMessage
 import org.telegram.telegrambots.api.objects.Update
@@ -18,7 +19,8 @@ class RssHandler() : TelegramLongPollingBot() {
         val firstName = update.message.from.firstName
         print(update.message.toString())
 
-        val respose = TelegramUpdateParser.parseUserMessage( User(userId, chatId, firstName), text )
+        val parser = TelegramUpdateParser(DbStorage())
+        val respose = parser.parseUserMessage( User(userId, chatId, firstName), text )
         sendMessageTo(chatId, respose)
 
     }

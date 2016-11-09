@@ -1,6 +1,6 @@
 package com.erindavide
 
-import com.erindavide.db.Storage
+import com.erindavide.db.DbStorage
 import org.telegram.telegrambots.TelegramBotsApi
 import org.telegram.telegrambots.exceptions.TelegramApiException
 import org.telegram.telegrambots.logging.BotLogger
@@ -9,7 +9,8 @@ val LOGTAG = "Tag_Main"
 
 fun main(args: Array<String>){
 
-    Storage.runMigrations()
+    val storage = DbStorage()
+    storage.runMigrations()
 
 
     val telegramBotsApi = TelegramBotsApi()
@@ -23,8 +24,8 @@ fun main(args: Array<String>){
             val rssList = Poller.checkForUpdates()
             for( url in rssList ){
                 println("checking for $url")
-                val users = Storage.getAllUsersFor(url)
-                var channelInfo = Storage.getChannelInfo(url)
+                val users = storage.getAllUsersFor(url)
+                var channelInfo = storage.getChannelInfo(url)
                 for(user in users){
                     handler.sendMessageTo(user.chatid,
                             "Hey ${user.firstName}, \n " +

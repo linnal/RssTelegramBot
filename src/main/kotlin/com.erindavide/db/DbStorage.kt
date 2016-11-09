@@ -7,10 +7,11 @@ import com.erindavide.data.User
 import com.erindavide.db.migrations.BotUser
 import com.erindavide.db.migrations.BotUserFeed
 import com.erindavide.db.migrations.Feed
+import com.erindavide.interfaces.Storage
 import com.heroku.sdk.jdbc.DatabaseUrl
 import java.sql.Connection
 
-object Storage {
+class DbStorage: Storage {
 
     fun withConnection(f: Connection.() -> Unit){
         val connection = DatabaseUrl.extract(true).connection
@@ -30,7 +31,7 @@ object Storage {
 
 
 
-    fun addRss(user: User, rss: String) {
+    override fun addRss(user: User, rss: String) {
 
         addOrUpdateUser(user)
 
@@ -41,7 +42,7 @@ object Storage {
         addUserFeed(user.id, rss)
     }
 
-    fun getAllRssFor(userId: Int): List<String> {
+    override fun getAllRssFor(userId: Int): List<String> {
         val rssList = emptyList<String>().toMutableList()
 
         val getRssForUser = "SELECT ID_FEED FROM BOTUSERFEED WHERE ID_BOTUSER=?"
@@ -58,7 +59,7 @@ object Storage {
         return rssList
     }
 
-    fun getAllRss(): List<String>{
+    override fun getAllRss(): List<String>{
         val rssList = emptyList<String>().toMutableList()
 
         val getRssForUser = "SELECT URL FROM FEED"
@@ -74,7 +75,7 @@ object Storage {
         return rssList
     }
 
-    fun getFeed(url: String): Item?{
+    override fun getFeed(url: String): Item?{
         var item: Item? = null
 
         val getRssForUser = "SELECT * FROM FEED WHERE URL=?"
@@ -93,7 +94,7 @@ object Storage {
         return item
     }
 
-    fun getChannelInfo(url: String): Channel{
+    override fun getChannelInfo(url: String): Channel{
         var channel: Channel = Channel()
 
         val getRssForUser = "SELECT * FROM FEED WHERE URL=?"
@@ -114,11 +115,11 @@ object Storage {
         return channel
     }
 
-    fun updateFeedItem(url:String, rss: Rss){
+    override fun updateFeedItem(url:String, rss: Rss){
         updateItem(url, rss.channel)
     }
 
-    fun getAllUsersFor(url: String): List<User> {
+    override fun getAllUsersFor(url: String): List<User> {
 
         val userList = emptyList<User>().toMutableList()
 
@@ -140,7 +141,7 @@ object Storage {
         return userList
     }
 
-    fun deleteRss(userId: Int, url: String){
+    override fun deleteRss(userId: Int, url: String){
         val deleteFeed = """DELETE FROM FEED
                           WHERE URL=?; """
 
@@ -159,7 +160,7 @@ object Storage {
     }
 
 
-    fun deleteAll(userId: Int) {
+    override fun deleteAll(userId: Int) {
         withConnection {
             val stmt = prepareStatement("DELETE FROM BOTUSERFEED WHERE ID_BOTUSER=?")
             stmt.setInt(1, userId)

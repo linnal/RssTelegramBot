@@ -1,18 +1,20 @@
 package com.erindavide
 
-import com.erindavide.db.Storage
+import com.erindavide.db.DbStorage
 import com.erindavide.parser.RssFeedParser
 
 object Poller {
 
+    val storage = DbStorage()
+
     fun checkForUpdates(): List<String>{
         val result = emptyList<String>().toMutableList()
 
-        val allFeeds = Storage.getAllRss()
+        val allFeeds = storage.getAllRss()
         for(url in allFeeds){
             val rss = RssFeedParser.parseFeed(url)
 
-            val lastItemSaved = Storage.getFeed(url)
+            val lastItemSaved = storage.getFeed(url)
             println("lastItemSaved = ${lastItemSaved.toString()}")
             val publishedItem = rss?.channel?.items?.first()
             println("publishedItem = ${publishedItem.toString()}")
@@ -21,7 +23,7 @@ object Poller {
                 continue
             }
 
-            Storage.updateFeedItem(url, rss!!)
+            storage.updateFeedItem(url, rss!!)
             result.add(url)
         }
 
