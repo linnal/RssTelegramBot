@@ -18,7 +18,7 @@ fun main(args: Array<String>){
     try {
         telegramBotsApi.registerBot(handler)
 
-        kotlin.concurrent.timer("poller", false, 1000L, 1000L){
+        kotlin.concurrent.timer("poller", false, 1000L, 10 * 60 * 1000L){
             println("checking")
 
             val rssList = Poller.checkForUpdates()
